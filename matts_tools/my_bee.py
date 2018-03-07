@@ -10,8 +10,6 @@ class Bee(Volant):
         self.game_params = game_params
 
     def advance(self, reverse=False):
-        # super(Bee, self).advance(reverse)
-        # self.energy -= 1 if self.nectar < self.game_params.bee_nectar_capacity else 2
         bee = super(Bee, self).advance(reverse)
         bee.energy -= 1 if self.nectar < self.game_params.bee_nectar_capacity else 2
         return bee
@@ -22,24 +20,13 @@ class Bee(Volant):
     def drink(self, nectar):
         self.nectar = min(self.game_params.bee_nectar_capacity, self.nectar + nectar)
         self.energy = self.energy + self.game_params.bee_energy_boost_per_nectar * nectar
-        # drink-edit
-        # return type(self)(self.x,
-        #                   self.y,
-        #                   self.heading,
-        #                   self.energy + self.game_params.bee_energy_boost_per_nectar * nectar,
-        #                   self.game_params,
-        #                   min(self.game_params.bee_nectar_capacity, self.nectar + nectar))
 
     def to_json(self):
-        # return super(Bee, self).to_json() + [self.energy, self.game_params._asdict(), self.nectar]
         return super(Bee, self).to_json() + [self.energy, self.game_params, self.nectar]
-        # return super(Bee, self).to_json() + [self.energy, self.game_params=None, self.nectar]
 
     @classmethod
     def from_json(cls, json):
-        # return cls(*json[1:-2], game_params=GameParameters(**json[-2]), nectar=json[-1])
         return cls(*json[1:-2], game_params=json[-2], nectar=json[-1])
-        # return cls(*json[1:-2], game_params=None, nectar=json[-1])
 
 
 class QueenBee(Bee):

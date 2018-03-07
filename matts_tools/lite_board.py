@@ -14,8 +14,6 @@ def _del_at_coordinate(items, x, y):
 
 def volant_from_json(json):
     name = json[0]
-    # if "My" not in name:
-    #     name = "My" + name
     return {'Seed': Seed, 'Bee': Bee, 'QueenBee': QueenBee}[name].from_json(json)
 
 
@@ -125,17 +123,12 @@ class LiteBoard(object):
 
         for bee_id, flower in vists.items():
             self.inflight[bee_id].drink(flower.potency)
-            # drink - edit
-            # self.inflight[bee_id] = self.inflight[bee_id].drink(flower.potency)
-            #  asdict - edit
             launch_seed = flower.visit(self.game_params)
-            # launch_seed = flower.visit()
             if launch_seed:
                 self.seeds_to_gen += 1
 
     def move_volants(self):
         for volant_id, volant in self.inflight.items():
-            # volant.advance()
             self.inflight[volant_id] = volant.advance()
 
     def send_volants(self):
@@ -152,7 +145,6 @@ class LiteBoard(object):
         for volant_id, routing in sent.items():
             del self.inflight[volant_id]
 
-        # return {volant_id: volant for (volant_id, (_, volant)) in sent.items()}
         return {}
 
     def apply_command(self, cmd, turn_num):
@@ -208,11 +200,9 @@ class LiteBoard(object):
                 "inflight": {volant_id: volant.to_json() for volant_id, volant in self.inflight.items()},
                 "deadBees": self.dead_bees,
                 "seedsToGen": self.seeds_to_gen}
-                # "gameParams": self.game_params._asdict()}
 
     @classmethod
     def from_json(cls, json):
-        # game_params=GameParameters(**json["gameParams"])
         return cls(board_width=json["boardWidth"],
                    board_height=json["boardHeight"],
                    hives=tuple(Hive(*hive) for hive in json["hives"]),

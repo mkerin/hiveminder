@@ -15,8 +15,6 @@ poss_headings = {0: [60, -60],
 
 def volant_from_json(json):
     name = json[0]
-    # if "My" not in name:
-    #     name = "My" + name
     return {'Seed': Seed, 'Bee': Bee, 'QueenBee': QueenBee}[name].from_json(json)
 
 

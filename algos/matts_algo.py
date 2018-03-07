@@ -16,7 +16,8 @@ import sys
 from collections import namedtuple
 from datetime import datetime, timedelta
 
-ScoreParameters = namedtuple("ScoreParams",[
+
+ScoreParameters = namedtuple("ScoreParams", [
     "is_oncourse",
     "seeds_spawned",
     "laden_and_oncourse_to_hive",
@@ -49,6 +50,35 @@ MY_SCORE_PARAMS = ScoreParameters(is_oncourse=1,
                                   nectar_score_factor=2,
                                   mid_stage_graded_nectar=[[60, 90, 10], [4, 3, 2]],
                                   early_stage_graded_nectar=[[100], [2]])
+
+
+def _ret_range_coords(center, size, limit):
+    min_n, max_n = max(center - size, 0), min(center + size, limit)
+    return range(min_n, max_n)
+
+
+def footprint(hive, size):
+    """Return valid tiles within 'size' of hive location."""
+    return [(x, y) for x in _ret_range_coords(hive[0], size, 8)
+            for y in _ret_range_coords(hive[1], size, 8)]
+
+
+def dfs_max_score(node, depth, hash_table):
+    """Max score from depth first search at fixed depth."""
+    if depth == 0:
+        return node.score
+
+    best_value = -10000
+    key = hash(node)
+    if key in hash_table and hash_table[key]["depth"] >= depth:
+        best_value = hash_table[key]["score"]
+    else:
+        for child in node.children:
+            v = dfs_max_score(child, depth - 1, hash_table)
+            best_value = max(best_value, v)
+
+        hash_table[key] = dict(cmd=node.cmd, depth=depth, score=best_value)
+    return best_value
 
 
 @algo_player(name="MattsAlgo",
@@ -86,43 +116,17 @@ def matts_algo(board_width, board_height, hives, flowers, inflight, crashed,
     Shelved Ideas:
     - [speed up] edit to volant.advance()
         attempted to change the volants internal state instead of returning new objects. This changes the result of
-        minimax at fixed depth. Unsure why.
+        dfs_max_score at fixed depth. Unsure why.
 
     """
     TIME_LIMIT = timedelta(microseconds=160000)
     then = datetime.now()
-    table = {}
+    hash_table = {}
 
     # PREPROCESSING - slightly hacky edit to pass single DEFAULT_GAME_PARAMLETERS pointer
     for vol_json in inflight.values():
         if vol_json[0] == "Bee" or vol_json[0] == "QueenBee":
             vol_json[5] = DEFAULT_GAME_PARAMETERS
-
-    # FUNCTIONS
-    def _ret_range_coords(center, size, limit):
-        min_n, max_n = max(center - size, 0), min(center + size, limit)
-        return range(min_n, max_n)
-
-    def footprint(hive, size):
-        return [(x, y) for x in _ret_range_coords(hive[0], size, 8)
-                for y in _ret_range_coords(hive[1], size, 8)]
-
-    def minimax(node, depth):
-        if depth == 0:
-            return node.score
-
-        best_value = -10000
-        key = hash(node)
-        if key in table and table[key]["depth"] >= depth:
-            best_value = table[key]["score"]
-        else:
-            for child in node.children:
-                v = minimax(child, depth - 1)
-                best_value = max(best_value, v)
-
-            table[key] = dict(cmd=node.cmd, depth=depth, score=best_value)
-
-        return best_value
 
     ## SCRIPTING
     if inflight:
@@ -159,17 +163,6 @@ def matts_algo(board_width, board_height, hives, flowers, inflight, crashed,
                           adjacent_to_flowers=adjacent_to_flowers,
                           adjacent_to_hives=adjacent_to_hives)
 
-        # node = MyNodeJson(board_width=board_width,
-        #                   board_height=board_height,
-        #                   hives = [(Hive(*i)) for i in hives],
-        #                   flowers=[Flower.from_json(i) for i in flowers],
-        #                   inflight={volant_id: volant_from_json(volant) for volant_id, volant in
-        #                             inflight.items()},
-        #                   turn_num=turn_num,
-        #                   game_params=DEFAULT_GAME_PARAMETERS,
-        #                   cmd=None,
-        #                   my_score_params=MY_SCORE_PARAMS)
-
         best_combo = (-10000, "No move better than -1000 found")
         bf_price = {"Bee": 2, "Seed": 3, "QueenBee": 3}
         bf = sum([bf_price[vol[0]] for _, vol in inflight.items()])
@@ -185,7 +178,7 @@ def matts_algo(board_width, board_height, hives, flowers, inflight, crashed,
                     start_of_first_eval = datetime.now()
 
                 child = node.get_child(command)
-                v = (minimax(child, depth - 1), command)
+                v = (dfs_max_score(child, depth - 1, hash_table), command)
                 best_combo = max(best_combo, v, key=lambda x: x[0])
 
                 # Return best result if evaluation of next branch predicted to breach time limit

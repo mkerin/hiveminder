@@ -21,7 +21,6 @@ class Volant(object):
         self.y += dy
         self.heading = heading
         return self
-        # return self._new_from_xyh(self.x + dx, self.y + dy, heading)
 
     def set_position(self, x, y):
         return self._new_from_xyh(x, y, self.heading)

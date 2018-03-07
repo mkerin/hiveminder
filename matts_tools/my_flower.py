@@ -22,11 +22,8 @@ class Flower(object):
 
     @classmethod
     def from_json(cls, json):
-        # return cls(json[0], json[1], None, *json[3:-1])
         module_location = {'Flower': 'my_flower', 'VenusBeeTrap': 'my_venus_bee_trap'}
         name = json[-1]
-        # if "" not in name:
-        #     name = "" + name
         new_flower_class = getattr(sys.modules['matts_tools.' + module_location[name]], name)
         return new_flower_class(json[0], json[1], None, *json[3:-1])
 
