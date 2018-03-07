@@ -29,9 +29,9 @@ Approach:
 * My algorithm is built around a depth first search to forecast future consequences of actions taken now, and to choose the move with maximal potential gain.
 
 Major efficiency improvements:
-* Transposition tables
+* Transposition tables  
 A priori I don't know how deep I can search and still return an answer within the time limit. Hence I search for the best move at depth 1, at depth 2, at depth 3 etc whilst checking how much time I've used up, and then return the best answer so far as soon as I get 'close' to the time limit. Obviously this is wasteful as I have to start at the top of the tree each time. To counter this I use tranposition tables so that when I re-evaluate the same state at a depth <= the previous search I can just return the value from the transposition table.
-* Removing bloat from Seed/Bee/QueenBee objects
+* Removing bloat from Seed/Bee/QueenBee objects  
 To evaluate the consequence of a given move I create a new board state reflecting the outcome of that move. This involves a lot of copying - or in our case converting to a json string and back. Using __copy__ constructors would have been nicer.. lets call it a legacy issue. As coded up by the ManAHL developers each Bee/QueenBee/Seed carries it's own copy of the game parameters. Turns out its quite a lot quicker to just refer to a single global GameParameters object if you're intending to create a lot of copies of these objects.
 
 Lessons learnt:
