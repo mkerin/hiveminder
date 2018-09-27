@@ -2,6 +2,8 @@
 
 This repo is forked from the [main HiveMinder repo](https://github.com/manahl/hiveminder), which contains an implementation of the game that was used in the Man AHL Coder Prize 2017 competition. This fork contains my submission to the competition (in algos/matts_algo.py) which was good enough to get to the final but not enough to place in the top 3.
 
+<img src="img/mk_finalists_certificate.png" width="600" height="400" />
+
 Some links:
 * [https://www.ahl.com/coderprize](https://www.ahl.com/coderprize)
 * [https://www.man.com/man-ahl-announces-coder-prize-winners-2017](https://www.man.com/man-ahl-announces-coder-prize-winners-2017)
